@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Module>
 <ModulePrefs title="Atlassian JIRA" />
-<UserPref name="feed" display_name="JIRA RSS feed" default_value="http://jira.atlassian.com/sr/jira.issueviews:searchrequest-rss/temp/SearchRequest.xml?&amp;updated%3Aprevious=-1d&amp;sorter/field=issuekey&amp;sorter/order=DESC&tempMax=200"/>
+<UserPref name="feed" display_name="JIRA RSS feed" default_value="http://jira.atlassian.com/sr/jira.issueviews:searchrequest-rss/temp/SearchRequest.xml?&amp;updated%3Aprevious=-1d&amp;sorter/field=issuekey&amp;sorter/order=DESC&amp;tempMax=200"/>
 <UserPref name="maxfeeditems" display_name="Items num" datatype="enum" default_value="10">
     <EnumValue value="1" display_value="1"/>
     <EnumValue value="2" display_value="2"/>
