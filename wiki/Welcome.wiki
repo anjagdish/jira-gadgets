@@ -1,0 +1,5 @@
+#summary One-sentence summary of this page.
+
+= Introduction =
+
+This project hosts Google gadgets that integrate with [http://www.atlassian.com/ Atlassian] [http://www.atlassian.com/software/jira JIRA].
