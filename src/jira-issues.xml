@@ -17,8 +17,8 @@
 		<Locale lang="en" country="us" />
 	</ModulePrefs>
 	<UserPref name="title" display_name="Custom Gadget Title" default_value="JIRA Issues" /> 
-	<UserPref name="feedurl" display_name="JIRA XML Feed" default_value="http://jira.atlassian.com/sr/jira.issueviews:searchrequest-rss/temp/SearchRequest.xml?&amp;updated%3Aprevious=-1d&amp;sorter/field=issuekey&amp;sorter/order=DESC" required="true"/>
-	<UserPref name="maxfeeditems" display_name="Items Total" datatype="enum" default_value="10" required="true">
+	<UserPref name="feedurl" display_name="JIRA XML Feed" default_value="http://jira.atlassian.com/sr/jira.issueviews:searchrequest-xml/temp/SearchRequest.xml?pid=10240&amp;updated%3Aprevious=-1d&amp;sorter/field=updated&amp;sorter/order=DESC" required="true"/>
+		<UserPref name="maxfeeditems" display_name="Items Total" datatype="enum" default_value="10" required="true">
 	    <EnumValue value="1" display_value="1"/>
 	    <EnumValue value="2" display_value="2"/>
 	    <EnumValue value="3" display_value="3"/>
@@ -30,7 +30,7 @@
 	    <EnumValue value="9" display_value="9"/>
 	    <EnumValue value="10" display_value="10"/>
 	</UserPref>
-	<UserPref name="displayIcons" display_name="Display JIRA icons" default_value="false" datatype="bool" required="true" /> 
+	<UserPref name="displayIcons" display_name="Display JIRA icons" default_value="true" datatype="bool" required="true" /> 
 <Content type="html"><![CDATA[
 
 <style type="text/css">
@@ -38,18 +38,33 @@
   color: #808080;
   font-size: x-small;
   text-align: right;
+  border-top: 1px solid #5F9ACF;
+  margin-top: 0.3em;
 }
 #footer__MODULE_ID__ a:link, #footer__MODULE_ID__ a:visited {
   color: #808080;
   text-decoration: none;
+  outline: none;
 }
 #footer__MODULE_ID__ a:hover, #footer__MODULE_ID__ a:active {
   color: #808080;
   text-decoration: underline;
+  outline: none;
+}
+.dude img {
+  border: 0;
+  padding: 0;
+  margin-top: 0.3em;
+  float: left;
+}
+.credits {
+  float: right;
+  margin-top: 0.3em;
 }
 #jiraissues__MODULE_ID__ {
   font-family: Arial, Helvetica, sans-serif;
   font-size: 12px;
+  outline: none;
 }
 a:link.issueLink, a:visited.issueLink {
   color: #000;
@@ -66,6 +81,7 @@ table.issues {
   border-collapse: collapse;
   padding: 1px 2px 1px 2px;
   padding: 1px 2px 1px 2px;
+  width: 100%;
 }
 table.issues tr th, table.issues tr:hover th {
   padding: 2px 3px 2px 3px;
@@ -111,7 +127,10 @@ table.issues tr:hover, table.issues tr:hover td a:link {
 </style>
 
 <div id="jiraissues__MODULE_ID__">loading...</div>
-<div id="footer__MODULE_ID__">Created by <a href="http://hanuska.blogspot.com/" target="_blank">Dushan Hanuska</a>. Powered by <a href="http://www.atlassian.com/" target="_blank">Atlassian</a> <a href="http://www.atlassian.com/software/jira" target="_blank">JIRA</a>.</div>
+<div id="footer__MODULE_ID__">
+  <span class="dude"><a href="http://www.atlassian.com/software/jira" target="_blank"><img src="http://dushan.hanuska.googlepages.com/atlassiandude.png" alt="atlassian" /></a><span>
+  <span class="credits">Created by <a href="http://hanuska.blogspot.com/" target="_blank">Dushan Hanuska</a>.</span>
+</div>
 <div id="debug__MODULE_ID__" style="font-size:9pt; padding:5px; color: red;"></div>
 
 <script type="text/javascript">
@@ -168,6 +187,18 @@ function getPriorityIcon(id) {
       return baseUrl + "images/icons/priority_trivial.gif";
   }
   return null;
+}
+
+function truncate(s,l) {
+  var trunc = s;
+  if (s.length > l) {
+    trunc = s.substring(0, l).replace(/\w+$/, '');
+    trunc += '<a href="#" ' +
+      'onclick="this.parentNode.innerHTML=' +
+      'unescape(\''+escape(s)+'\');_IG_AdjustIFrameHeight();return false;">' +
+      '...<\/a>';
+  }
+  return trunc;
 }
 
 function processFeed(response)
@@ -255,10 +286,10 @@ function processFeed(response)
     html += '</td>\n';
     html += '\t<td class="summary" title="' + key + ': ' + status + ', ' + resolution + '' + '">';
     if (link == null) {
-      html += summary;
+      html += truncate(summary,80);
     }
     else {
-      html += '<a class="issueLink" href="' + link + '" target="_blank" onClick="issueClick(); return true;">' + summary + '</a>';
+      html += '<a class="issueLink" href="' + link + '" target="_blank" onClick="issueClick(); return true;">' + truncate(summary,80) + '</a>';
     }
     html += '</td>\n';
     html += '\t<td class="priority" title="Priority: ' + priority + '">';
