@@ -141,6 +141,7 @@ table.issues tr.highlight, table.issues tr.highlight td a:link {
 }
 .summary {
   vertical-align: middle;
+  padding: 3px 3px 3px 3px;
 }
 .priority {
   width: 4%;
@@ -355,7 +356,13 @@ function issueClick() {
   _IG_Analytics("UA-1805882-1", "/jira-issues-gadget/issueclick");
 }
 
-_IG_FetchXmlContent(feedurl + "&tempMax=" + __UP_maxFeedItems__, processFeed);
+if (feedurl.indexOf("tempMax=") >= 0) {
+  feedurl = feedurl.replace(/tempMax=[0-9]*/g, ("tempMax=" + __UP_maxFeedItems__));
+}
+else {
+  feedurl += "&tempMax=" + __UP_maxFeedItems__;
+}
+_IG_FetchXmlContent(feedurl, processFeed);
 _IG_AdjustIFrameHeight();
 </script>
 ]]></Content>
