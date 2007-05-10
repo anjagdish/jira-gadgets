@@ -1,15 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Module>
-	<ModulePrefs
-		title="__UP_title__" 
-		title_url=""
-		directory_title="JIRA Issue Tracking"
-		author="Dushan Hanuska" 
-		author_email="dushan.hanuska+gadget@gmail.com" 
-		author_location="Sydney, New South Wales, Australia" 
-		author_photo="http://static.flickr.com/121/buddyicons/97304820@N00.jpg?1159788693"
-		author_affiliation="Atlassian Software Systems"
-		author_link="http://hanuska.blogspot.com">
+  <ModulePrefs
+    title="__UP_title__"
+    directory_title="JIRA Issue Tracking"
+    title_url="http://dushan.hanuska.googlepages.com/jiraissuesgadget"
+    description="This gadget integrates personalized Google Home with an issue search on Atlassian JIRA. Live instance of JIRA can bee seen at http://jira.atlassian.com/."
+    author="Dushan Hanuska"
+    author_email="dushan.hanuska+gadget@gmail.com" 
+    author_affiliation="Atlassian Software Systems"
+    author_location="Sydney, New South Wales, Australia" 
+		author_photo="http://dushan.hanuska.googlepages.com/author_dushan_hanuska.png"
+    author_aboutme="I am a senior Java developer, currently residing in Sydney, Australia and working at Atlassian in JIRA team. For all Java and other things see my blog at http://hanuska.blogspot.com"
+		author_link="http://hanuska.blogspot.com"
+    author_quote="Life is what you make it."
+    screenshot="http://dushan.hanuska.googlepages.com/jira-issues-screenshot-icons.png"
+    singleton="false"
+    thumbnail="http://dushan.hanuska.googlepages.com/jira-issues-thumbnail.png"
+    >
 		<Require feature="analytics" />
 		<Require feature="dynamic-height" />
 		<Require feature="setprefs" />
@@ -18,7 +25,7 @@
 	</ModulePrefs>
 	<UserPref name="title" display_name="Custom Gadget Title" default_value="JIRA Issues" /> 
 	<UserPref name="feedurl" display_name="JIRA XML Feed" default_value="http://jira.atlassian.com/sr/jira.issueviews:searchrequest-xml/temp/SearchRequest.xml?pid=10240&amp;updated%3Aprevious=-1d&amp;sorter/field=updated&amp;sorter/order=DESC" required="true"/>
-		<UserPref name="maxfeeditems" display_name="Items Total" datatype="enum" default_value="10" required="true">
+	<UserPref name="maxFeedItems" display_name="Items Total" datatype="enum" default_value="10" required="true">
 	    <EnumValue value="1" display_value="1"/>
 	    <EnumValue value="2" display_value="2"/>
 	    <EnumValue value="3" display_value="3"/>
@@ -30,13 +37,30 @@
 	    <EnumValue value="9" display_value="9"/>
 	    <EnumValue value="10" display_value="10"/>
 	</UserPref>
+	<UserPref name="maxSummaryLength" display_name="Maximum Summary Length" datatype="enum" default_value="80">
+      <EnumValue value="20" display_value="20 - minimalistic"/>
+      <EnumValue value="22" display_value="22"/>
+      <EnumValue value="24" display_value="24 - text on 1024x768"/>
+      <EnumValue value="26" display_value="26 - icons on 800x600"/>
+      <EnumValue value="30" display_value="30"/>
+      <EnumValue value="40" display_value="40 - icons on 1024x768"/>
+      <EnumValue value="50" display_value="50"/>
+      <EnumValue value="60" display_value="60"/>
+      <EnumValue value="70" display_value="70"/>
+      <EnumValue value="80" display_value="80"/>
+      <EnumValue value="90" display_value="90"/>
+      <EnumValue value="100" display_value="100"/>
+      <EnumValue value="120" display_value="120"/>
+      <EnumValue value="2000" display_value="unlimited"/>
+	</UserPref>
 	<UserPref name="displayIcons" display_name="Display JIRA icons" default_value="true" datatype="bool" required="true" /> 
 <Content type="html"><![CDATA[
 
 <style type="text/css">
 #footer__MODULE_ID__ {
   color: #808080;
-  font-size: x-small;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 9px;
   text-align: right;
   border-top: 1px solid #5F9ACF;
   margin-top: 0.3em;
@@ -82,26 +106,24 @@ table.issues {
   padding: 1px 2px 1px 2px;
   padding: 1px 2px 1px 2px;
   width: 100%;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 12px;
 }
-table.issues tr th, table.issues tr:hover th {
+table.issues tr th {
   padding: 2px 3px 2px 3px;
   text-alight: left;
   font-weight: bold;
-  font-size: smaller;
   background-color: #AAA;
   color: #FFF;
 }
 table.issues tr td {
   padding: 2px 3px 2px 3px;
+  text-alight: left;
+  vertical-align: top;
 }
-table.issues tr:hover, table.issues tr:hover td a:link {
+table.issues tr.highlight, table.issues tr.highlight td a:link {
   background-color: #5F9ACF;
   color: #FFF;
-}
-.issue {
-  vertical-align: top;
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 12px;
 }
 .odd {
   background-color: #FFF;
@@ -134,24 +156,23 @@ table.issues tr:hover, table.issues tr:hover td a:link {
 <div id="debug__MODULE_ID__" style="font-size:9pt; padding:5px; color: red;"></div>
 
 <script type="text/javascript">
+
+// DEBUG flag. When its value is non-zero, debugging messages are displayed
+var debug = 0;
+// The string containing debugging messages
+var debug_html = "";
+// Outputs debug messages if debug flag has a non-zero value
+function log(msg) {      
+  if (debug) {
+    debug_html += msg + "\n";
+    // Write debug HTML to div
+    _gel("debug__MODULE_ID__").innerHTML = debug_html;
+    _IG_AdjustIFrameHeight();
+  }
+}
+
 // Google Analytics
 _IG_Analytics("UA-1805882-1", "/jira-issues-gadget");
-
-// Get userprefs
-var prefs = new _IG_Prefs(__MODULE_ID__);
-var feedurl = prefs.getString("feedurl");
-var maxfeeditems = prefs.getInt("maxfeeditems");
-var displayIcons = prefs.getBool("displayIcons");
-
-// Get base URL for icons (image locations)
-var baseUrl = getBaseUrl(feedurl);
-
-_IG_SetTitle(prefs.getString("title"));
-
-function getBaseUrl(url) {
-  // TODO: implement
-  return "http://jira.atlassian.com/";
-}
 
 function getTypeIcon(id) {
   switch(id) {
@@ -189,17 +210,39 @@ function getPriorityIcon(id) {
   return null;
 }
 
-function truncate(s,l) {
-  var trunc = s;
-  if (s.length > l) {
-    trunc = s.substring(0, l).replace(/\w+$/, '');
-    trunc += '<a href="#" ' +
-      'onclick="this.parentNode.innerHTML=' +
-      'unescape(\''+escape(s)+'\');_IG_AdjustIFrameHeight();return false;">' +
-      '...<\/a>';
+function truncate(summary,linkedSummary,maxLength) {
+  if (summary.length > maxLength) {
+    return '<a class="issueLink"'
+	  + ' onMouseOver="window.status=\'Expand\';return true"'
+	  + ' onMouseOut="window.status=\'\';return true"'
+	  + ' href="#"'
+	  + ' onclick="this.parentNode.innerHTML=unescape(\''+escape(linkedSummary)+'\');_IG_AdjustIFrameHeight();return false;">'
+      + summary.substring(0, maxLength).replace(/\w+$/, '')
+	  + '...<\/a>';
   }
-  return trunc;
+  return linkedSummary;
 }
+
+// Get base url for icons
+function getBaseUrl(url) {
+  var index = url.lastIndexOf("sr/jira.issueviews");
+  if (index >= 0) {
+    return url.substring(url, index);
+  }
+  return url;
+}
+
+// Get userprefs
+var prefs = new _IG_Prefs(__MODULE_ID__);
+var feedurl = prefs.getString("feedurl");
+var maxFeedItems = prefs.getInt("maxFeedItems");
+var displayIcons = prefs.getBool("displayIcons");
+var maxSummaryLength = parseInt(prefs.getInt("maxSummaryLength"));
+
+// Get base URL for icons (image locations)
+var baseUrl = getBaseUrl(feedurl);
+
+_IG_SetTitle(prefs.getString("title"));
 
 function processFeed(response)
 {
@@ -217,7 +260,7 @@ function processFeed(response)
   var itemList = response.getElementsByTagName("item");
 
   // DEBUG: is the function getting called?
-  log("Items count: " + itemList.length + '(' + maxfeeditems + ')<br />');
+  log("Items count: " + itemList.length + '(' + maxFeedItems + ')<br />');
  
   html += '<table class="issues">';
   if (displayIcons == false) {
@@ -225,7 +268,7 @@ function processFeed(response)
   }
 
   // Loop through all <item> nodes
-  for (var i = 0; i < itemList.length && i < maxfeeditems; i++) { 
+  for (var i = 0; i < itemList.length && i < maxFeedItems; i++) { 
     var key = "";
     var link = null;
     var summary = "";
@@ -275,7 +318,7 @@ function processFeed(response)
     }
     
     // Append extracted data to the HTML string.
-    html += '<tr class="issue ' + (i % 2 == 0 ? 'even' : 'odd') + '">\n';
+    html += '<tr class="' + (i % 2 == 0 ? 'even' : 'odd') + '" onMouseOver="this.className=\'highlight\'" onMouseOut="this.className=\'' + (i % 2 == 0 ? 'even' : 'odd') + '\'">\n';
     html += '\t<td class="type" title="Type: ' + type + '">';
     if (displayIcons) {
       html += '<span class="icon">' + (typeIcon == null ? '&nbsp;' : '<img src="' + typeIcon + '" alt="' + type + '"/>') + '</span>';
@@ -286,10 +329,10 @@ function processFeed(response)
     html += '</td>\n';
     html += '\t<td class="summary" title="' + key + ': ' + status + ', ' + resolution + '' + '">';
     if (link == null) {
-      html += truncate(summary,80);
+      html += truncate(summary,summary,maxSummaryLength);
     }
     else {
-      html += '<a class="issueLink" href="' + link + '" target="_blank" onClick="issueClick(); return true;">' + truncate(summary,80) + '</a>';
+      html += truncate(summary,'<a class="issueLink" href="' + link + '" target="_blank" onClick="issueClick(); return true;">' + summary + '</a>',maxSummaryLength);
     }
     html += '</td>\n';
     html += '\t<td class="priority" title="Priority: ' + priority + '">';
@@ -312,20 +355,7 @@ function issueClick() {
   _IG_Analytics("UA-1805882-1", "/jira-issues-gadget/issueclick");
 }
 
-// debug flag. When its value is non-zero, debugging messages are displayed
-var debug = 0;
-// The string containing debugging messages
-var debug_html = "";
-// Outputs debug messages if debug flag has a non-zero value
-function log(msg) {      
-  if (debug) {
-    debug_html += msg;
-    // Write debug HTML to div
-    _gel("debug__MODULE_ID__").innerHTML = debug_html;
-    _IG_AdjustIFrameHeight();
-  }
-}
-_IG_FetchXmlContent(feedurl + "&tempMax=" + __UP_maxfeeditems__, processFeed);
+_IG_FetchXmlContent(feedurl + "&tempMax=" + __UP_maxFeedItems__, processFeed);
 _IG_AdjustIFrameHeight();
 </script>
 ]]></Content>
