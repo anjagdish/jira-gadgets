@@ -23,8 +23,8 @@
 		<Require feature="settitle" />
 		<Locale lang="en" country="us" />
 	</ModulePrefs>
-	<UserPref name="title" display_name="Custom Gadget Title" default_value="JIRA Issues" /> 
-	<UserPref name="feedurl" display_name="JIRA XML Feed" default_value="http://jira.atlassian.com/sr/jira.issueviews:searchrequest-xml/temp/SearchRequest.xml?pid=10240&amp;updated%3Aprevious=-1d&amp;sorter/field=updated&amp;sorter/order=DESC" required="true"/>
+	<UserPref name="title" display_name="Gadget Title" default_value="JIRA Issues" /> 
+	<UserPref name="feedurl" display_name="JIRA XML URL" default_value="http://jira.atlassian.com/sr/jira.issueviews:searchrequest-xml/temp/SearchRequest.xml?pid=10240&amp;updated%3Aprevious=-1d&amp;sorter/field=updated&amp;sorter/order=DESC" required="true"/>
 	<UserPref name="maxFeedItems" display_name="Items Total" datatype="enum" default_value="10" required="true">
 	    <EnumValue value="1" display_value="1"/>
 	    <EnumValue value="2" display_value="2"/>
@@ -37,7 +37,7 @@
 	    <EnumValue value="9" display_value="9"/>
 	    <EnumValue value="10" display_value="10"/>
 	</UserPref>
-	<UserPref name="maxSummaryLength" display_name="Maximum Summary Length" datatype="enum" default_value="80">
+	<UserPref name="maxSummaryLength" display_name="Summary length" datatype="enum" default_value="40">
       <EnumValue value="20" display_value="20 - minimalistic"/>
       <EnumValue value="22" display_value="22"/>
       <EnumValue value="24" display_value="24 - text on 1024x768"/>
@@ -53,7 +53,10 @@
       <EnumValue value="120" display_value="120"/>
       <EnumValue value="2000" display_value="unlimited"/>
 	</UserPref>
-	<UserPref name="displayIcons" display_name="Display JIRA icons" default_value="true" datatype="bool" required="true" /> 
+	<UserPref name="displayIcons" display_name="Display icons?" default_value="true" datatype="bool" required="true" /> 
+	<UserPref name="feedusername" display_name="Username" default_value="" />
+	<UserPref name="feedpassword" display_name="Password" default_value="" />
+  <UserPref name="inited" datatype="hidden" default_value="false" />
 <Content type="html"><![CDATA[
 
 <style type="text/css">
@@ -147,9 +150,28 @@ table.issues tr.highlight, table.issues tr.highlight td a:link {
   width: 4%;
   white-space: nowrap;
 }
+.xmlurl {
+  color: #606060;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 12px;
+  border: 1px solid #5F9ACF;
+}
+.error {
+  color: #DD0000;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 12px;
+  font-weight: bold;
+}
+.msg {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 12px;
+}
+.minor {
+  font-size: smaller;
+}
 </style>
 
-<div id="jiraissues__MODULE_ID__">loading...</div>
+<div id="jiraissues__MODULE_ID__"><img src="http://dushan.hanuska.googlepages.com/waiting.gif" alt="" /> loading...</div>
 <div id="footer__MODULE_ID__">
   <span class="dude"><a href="http://www.atlassian.com/software/jira" target="_blank"><img src="http://dushan.hanuska.googlepages.com/atlassiandude.png" alt="atlassian" /></a><span>
   <span class="credits">Created by <a href="http://hanuska.blogspot.com/" target="_blank">Dushan Hanuska</a>.</span>
@@ -157,11 +179,17 @@ table.issues tr.highlight, table.issues tr.highlight td a:link {
 <div id="debug__MODULE_ID__" style="font-size:9pt; padding:5px; color: red;"></div>
 
 <script type="text/javascript">
+// Google Analytics
+_IG_Analytics("UA-1805882-1", "/jira-issues-gadget");
+
+function issueClick() {
+  _IG_Analytics("UA-1805882-1", "/jira-issues-gadget/issueclick");
+}
 
 // DEBUG flag. When its value is non-zero, debugging messages are displayed
 var debug = 0;
 // The string containing debugging messages
-var debug_html = "";
+var debug_html = "<br/>";
 // Outputs debug messages if debug flag has a non-zero value
 function log(msg) {      
   if (debug) {
@@ -172,41 +200,70 @@ function log(msg) {
   }
 }
 
-// Google Analytics
-_IG_Analytics("UA-1805882-1", "/jira-issues-gadget");
+function getXmlUrl(u) {
+  var feedusername = prefs.getString("feedusername");
+  var feedpassword = prefs.getString("feedpassword");
+  var xmlUrl = u;
+  if (u.indexOf("tempMax=") >= 0) {
+    xmlUrl = u.replace(/tempMax=[0-9]*/g, ("tempMax=" + __UP_maxFeedItems__));
+  }
+  else {
+    xmlUrl += "&tempMax=" + __UP_maxFeedItems__;
+  }
+  if (feedusername) {
+    xmlUrl += "&os_username=" + feedusername;
+    if (feedpassword) {
+      xmlUrl += "&os_password=" + feedpassword;
+    }
+  }
+  return xmlUrl;
+}
 
-function getTypeIcon(id) {
+function update(xmlUrl) {
+  // DEBUG
+  log("Setting 'feedurl' to " + xmlUrl + "<br/>");
+  prefs.set('feedurl', xmlUrl);
+  prefs.set('inited', 'true');
+  log("Initialized.<br/>");
+  _IG_FetchXmlContent(getXmlUrl(xmlUrl), processFeed);
+}
+
+function showLoading() {
+  _gel("jiraissues__MODULE_ID__").innerHTML = '<img src="http://dushan.hanuska.googlepages.com/waiting.gif" alt="" /> loading...';
+}
+
+function getTypeIcon(u, id) {
   switch(id) {
     case '1':
-      return baseUrl + "images/icons/bug.gif";
+      return u + "images/icons/bug.gif";
     case '2':
-      return baseUrl + "images/icons/newfeature.gif";
+      return u + "images/icons/newfeature.gif";
     case '3':
-      return baseUrl + "images/icons/task.gif";
+      return u + "images/icons/task.gif";
     case '4':
-      return baseUrl + "images/icons/improvement.gif";
+      return u + "images/icons/improvement.gif";
     case '5':
-      return baseUrl + "images/icons/status_generic.gif";
+      return u + "images/icons/status_generic.gif";
     case '6':
-      return baseUrl + "images/icons/issue_subtask.gif";
+      return u + "images/icons/issue_subtask.gif";
     case '7':
-      return baseUrl + "images/icons/genericissue.gif";
+      return u + "images/icons/genericissue.gif";
   }
   return baseUrl + "images/icons/genericissue.gif";
 }
 
-function getPriorityIcon(id) {
+function getPriorityIcon(u, id) {
   switch(id) {
     case '1':
-      return baseUrl + "images/icons/priority_blocker.gif";
+      return u + "images/icons/priority_blocker.gif";
     case '2':
-      return baseUrl + "images/icons/priority_critical.gif";
+      return u + "images/icons/priority_critical.gif";
     case '3':
-      return baseUrl + "images/icons/priority_major.gif";
+      return u + "images/icons/priority_major.gif";
     case '4':
-      return baseUrl + "images/icons/priority_minor.gif";
+      return u + "images/icons/priority_minor.gif";
     case '5':
-      return baseUrl + "images/icons/priority_trivial.gif";
+      return u + "images/icons/priority_trivial.gif";
   }
   return null;
 }
@@ -235,28 +292,36 @@ function getBaseUrl(url) {
 
 // Get userprefs
 var prefs = new _IG_Prefs(__MODULE_ID__);
-var feedurl = prefs.getString("feedurl");
-var maxFeedItems = prefs.getInt("maxFeedItems");
-var displayIcons = prefs.getBool("displayIcons");
-var maxSummaryLength = parseInt(prefs.getInt("maxSummaryLength"));
-
-// Get base URL for icons (image locations)
-var baseUrl = getBaseUrl(feedurl);
-
 _IG_SetTitle(prefs.getString("title"));
 
 function processFeed(response)
 {
+  var feedurl = prefs.getString("feedurl");
+  var maxFeedItems = prefs.getInt("maxFeedItems");
+  var displayIcons = prefs.getBool("displayIcons");
+  var maxSummaryLength = parseInt(prefs.getInt("maxSummaryLength"));
+  // Get base URL for icons (image locations)
+  var baseUrl = getBaseUrl(feedurl);
+
+  var html = "";
+
   if (response == null || typeof(response) != "object" || response.firstChild == null) {
+    // DEBUG
+    log("Invalid response!<br />");
     _IG_Analytics("UA-1805882-1", "/jira-issues-gadget/invalid_response");
-    _gel("jira_issues").innerHTML = "<i>Invalid data.</i>";
+    html += '<span class="error">Cannot retrieve JIRA data!</span><br />';
+    html += '<span class="msg">Possible causes: URL is invalid or JIRA is not accessible <span class="minor">(possibly behind firewall?)</span></span><br /><br />';
+    html += '<form action="" onsubmit="update(this.elements[\'xmlurl\'].value);showLoading();return false;" >';
+    html += '<input name="xmlurl" class="xmlurl" type="text" size="32" value="' + feedurl + '" />';
+    html += '<input type="submit" value="Save" />';
+    html += '</form>';
+    _gel("jiraissues__MODULE_ID__").innerHTML = html;
+    _IG_AdjustIFrameHeight();
     return;
   }
   // DEBUG: is the function getting called?
   log("Response is valid.<br />");
 	
-  var html = "";
-
   // Get a list of the <item> element nodes in the file
   var itemList = response.getElementsByTagName("item");
 
@@ -300,14 +365,14 @@ function processFeed(response)
         type = node.firstChild.nodeValue;
         if (displayIcons == true)
         {
-          typeIcon = getTypeIcon(node.getAttribute("id"));
+          typeIcon = getTypeIcon(baseUrl, node.getAttribute("id"));
         }
       }
       if (node.nodeName == "priority") {
         priority = node.firstChild.nodeValue; 
         if (displayIcons == true)
         {
-          priorityIcon = getPriorityIcon(node.getAttribute("id"));
+          priorityIcon = getPriorityIcon(baseUrl, node.getAttribute("id"));
         }
       }
       if (node.nodeName == "status") {
@@ -352,18 +417,22 @@ function processFeed(response)
   _IG_AdjustIFrameHeight();
 }
 
-function issueClick() {
-  _IG_Analytics("UA-1805882-1", "/jira-issues-gadget/issueclick");
-}
-
-if (feedurl.indexOf("tempMax=") >= 0) {
-  feedurl = feedurl.replace(/tempMax=[0-9]*/g, ("tempMax=" + __UP_maxFeedItems__));
+var inited = prefs.getString("inited");
+// DEBUG
+log("Inited:" + inited + "<br/>");
+if (inited == "false") {
+  var html = "";
+  html += '<form name="xmlform" action="" onsubmit="update(this.elements[\'xmlurl\'].value);showLoading();return false;">';
+  html += '<input name="xmlurl" class="xmlurl" type="text" size="30" value="Please paste your JIRA URL here" />';
+  html += '<input type="submit" value="Save" />';
+  html += '</form>';
+  _gel("jiraissues__MODULE_ID__").innerHTML = html;
+  _IG_AdjustIFrameHeight();
 }
 else {
-  feedurl += "&tempMax=" + __UP_maxFeedItems__;
+  _IG_FetchXmlContent(getXmlUrl(prefs.getString("feedurl")), processFeed);
+  _IG_AdjustIFrameHeight();
 }
-_IG_FetchXmlContent(feedurl, processFeed);
-_IG_AdjustIFrameHeight();
 </script>
 ]]></Content>
 </Module>
