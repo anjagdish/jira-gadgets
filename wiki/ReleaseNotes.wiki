@@ -1,0 +1,6 @@
+#summary JIRA Issues gadget release notes
+
+== JIRA Issues Gadget 1.0 ==
+
+=== New Features ===
+  * Initial implemetation, which fetches 1-10 issues from JIRA via its XML view.
