@@ -417,22 +417,8 @@ function processFeed(response)
   _IG_AdjustIFrameHeight();
 }
 
-var inited = prefs.getString("inited");
-// DEBUG
-log("Inited:" + inited + "<br/>");
-if (inited == "false") {
-  var html = "";
-  html += '<form name="xmlform" action="" onsubmit="update(this.elements[\'xmlurl\'].value);showLoading();return false;">';
-  html += '<input name="xmlurl" class="xmlurl" type="text" size="30" value="Please paste your JIRA URL here" />';
-  html += '<input type="submit" value="Save" />';
-  html += '</form>';
-  _gel("jiraissues__MODULE_ID__").innerHTML = html;
-  _IG_AdjustIFrameHeight();
-}
-else {
-  _IG_FetchXmlContent(getXmlUrl(prefs.getString("feedurl")), processFeed);
-  _IG_AdjustIFrameHeight();
-}
+_IG_FetchXmlContent(getXmlUrl(prefs.getString("feedurl")), processFeed);
+_IG_AdjustIFrameHeight();
 </script>
 ]]></Content>
 </Module>
