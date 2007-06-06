@@ -114,14 +114,14 @@ table.issues {
 }
 table.issues tr th {
   padding: 2px 3px 2px 3px;
-  text-alight: left;
+  text-align: left;
   font-weight: bold;
   background-color: #AAA;
   color: #FFF;
 }
 table.issues tr td {
   padding: 2px 3px 2px 3px;
-  text-alight: left;
+  text-align: left;
   vertical-align: top;
 }
 table.issues tr.highlight, table.issues tr.highlight td a:link {
