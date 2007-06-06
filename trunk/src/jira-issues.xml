@@ -319,99 +319,103 @@ function processFeed(response)
     _IG_AdjustIFrameHeight();
     return;
   }
-  // DEBUG: is the function getting called?
+  
   log("Response is valid.");
 	
   // Get a list of the <item> element nodes in the file
   var itemList = response.getElementsByTagName("item");
 
-  // DEBUG: is the function getting called?
   log("Items count: " + itemList.length + ' (' + maxFeedItems + ')');
  
-  html += '<table class="issues">';
-  if (displayIcons == false) {
-    html += '<tr><th>Type</th><th>Summary</th><th>Priority</th></tr>'
-  }
-
-  // Loop through all <item> nodes
-  for (var i = 0; i < itemList.length && i < maxFeedItems; i++) { 
-    var key = "";
-    var link = null;
-    var summary = "";
-    var type = "";
-    var typeIcon = null;
-    var priority = "";
-    var priorityIcon = null;
-    var status = "";
-    var resolution = "";
-
-    // For each <item> node, get child nodes.
-    var nodeList = itemList.item(i).childNodes;
-
-    // Loop through child nodes. Extract data from the text nodes that are
-    // the children of the associated name, price, and calories element nodes.
-    for (var j = 0; j < nodeList.length; j++) {
-      var node = nodeList.item(j);
-      if (node.nodeName == "key") {
-        key = node.firstChild.nodeValue;
-      }
-      if (node.nodeName == "link") {
-        link = node.firstChild.nodeValue;
-      }
-      if (node.nodeName == "summary") {
-        summary = node.firstChild.nodeValue; 
-      }
-      if (node.nodeName == "type") {
-        type = node.firstChild.nodeValue;
-        if (displayIcons == true)
-        {
-          typeIcon = getTypeIcon(baseUrl, node.getAttribute("id"));
-        }
-      }
-      if (node.nodeName == "priority") {
-        priority = node.firstChild.nodeValue; 
-        if (displayIcons == true)
-        {
-          priorityIcon = getPriorityIcon(baseUrl, node.getAttribute("id"));
-        }
-      }
-      if (node.nodeName == "status") {
-        status = node.firstChild.nodeValue; 
-      }
-      if (node.nodeName == "resolution") {
-        resolution = node.firstChild.nodeValue; 
-      }
+  if (itemList.length > 0) {
+    html += '<table class="issues">';
+    if (displayIcons == false) {
+      html += '<tr><th>Type</th><th>Summary</th><th>Priority</th></tr>'
     }
+
+    // Loop through all <item> nodes
+    for (var i = 0; i < itemList.length && i < maxFeedItems; i++) { 
+      var key = "";
+      var link = null;
+      var summary = "";
+      var type = "";
+      var typeIcon = null;
+      var priority = "";
+      var priorityIcon = null;
+      var status = "";
+      var resolution = "";
+
+      // For each <item> node, get child nodes.
+      var nodeList = itemList.item(i).childNodes;
+
+      // Loop through child nodes. Extract data from the text nodes that are
+      // the children of the associated name, price, and calories element nodes.
+      for (var j = 0; j < nodeList.length; j++) {
+        var node = nodeList.item(j);
+        if (node.nodeName == "key") {
+          key = node.firstChild.nodeValue;
+        }
+        if (node.nodeName == "link") {
+          link = node.firstChild.nodeValue;
+        }
+        if (node.nodeName == "summary") {
+          summary = node.firstChild.nodeValue; 
+        }
+        if (node.nodeName == "type") {
+          type = node.firstChild.nodeValue;
+          if (displayIcons == true)
+          {
+            typeIcon = getTypeIcon(baseUrl, node.getAttribute("id"));
+          }
+        }
+        if (node.nodeName == "priority") {
+          priority = node.firstChild.nodeValue; 
+          if (displayIcons == true)
+          {
+            priorityIcon = getPriorityIcon(baseUrl, node.getAttribute("id"));
+          }
+        }
+        if (node.nodeName == "status") {
+          status = node.firstChild.nodeValue; 
+        }
+        if (node.nodeName == "resolution") {
+          resolution = node.firstChild.nodeValue; 
+        }
+      }
     
-    // Append extracted data to the HTML string.
-    html += '<tr class="' + (i % 2 == 0 ? 'even' : 'odd') + '" onMouseOver="this.className=\'highlight\'" onMouseOut="this.className=\'' + (i % 2 == 0 ? 'even' : 'odd') + '\'">\n';
-    html += '\t<td class="type" title="Type: ' + type + '">';
-    if (displayIcons) {
-      html += '<span class="icon">' + (typeIcon == null ? '&nbsp;' : '<img src="' + typeIcon + '" alt="' + type + '"/>') + '</span>';
+      // Append extracted data to the HTML string.
+      html += '<tr class="' + (i % 2 == 0 ? 'even' : 'odd') + '" onMouseOver="this.className=\'highlight\'" onMouseOut="this.className=\'' + (i % 2 == 0 ? 'even' : 'odd') + '\'">\n';
+      html += '\t<td class="type" title="Type: ' + type + '">';
+      if (displayIcons) {
+        html += '<span class="icon">' + (typeIcon == null ? '&nbsp;' : '<img src="' + typeIcon + '" alt="' + type + '"/>') + '</span>';
+      }
+      else {
+        html += type;
+      }
+      html += '</td>\n';
+      html += '\t<td class="summary" title="' + key + ': ' + status + ', ' + resolution + '' + '">';
+      if (link == null) {
+        html += truncate(summary,summary,maxSummaryLength);
+      }
+      else {
+        html += truncate(summary,'<a class="issueLink" href="' + link + '" target="_blank" onClick="issueClick(); return true;">' + summary + '</a>',maxSummaryLength);
+      }
+      html += '</td>\n';
+      html += '\t<td class="priority" title="Priority: ' + priority + '">';
+      if (displayIcons) {
+        html += '<span class="icon">' + (priorityIcon == null ? '&nbsp;' : '<img src="' + priorityIcon + '" title="Priority: ' + priority + '" alt="' + priority + '"/>') + '</span>';
+      }
+      else {
+        html += priority;
+      }
+      html += '</td>\n';
+      html += '</tr>\n';
     }
-    else {
-      html += type;
-    }
-    html += '</td>\n';
-    html += '\t<td class="summary" title="' + key + ': ' + status + ', ' + resolution + '' + '">';
-    if (link == null) {
-      html += truncate(summary,summary,maxSummaryLength);
-    }
-    else {
-      html += truncate(summary,'<a class="issueLink" href="' + link + '" target="_blank" onClick="issueClick(); return true;">' + summary + '</a>',maxSummaryLength);
-    }
-    html += '</td>\n';
-    html += '\t<td class="priority" title="Priority: ' + priority + '">';
-    if (displayIcons) {
-      html += '<span class="icon">' + (priorityIcon == null ? '&nbsp;' : '<img src="' + priorityIcon + '" title="Priority: ' + priority + '" alt="' + priority + '"/>') + '</span>';
-    }
-    else {
-      html += priority;
-    }
-    html += '</td>\n';
-    html += '</tr>\n';
+    html += '</table>';
   }
-  html += '</table>';
+  else {
+    html += '<span class="issues">No matching issues found</span>';
+  }
 
   _gel("jiraissues__MODULE_ID__").innerHTML = html;
   _IG_AdjustIFrameHeight();
