@@ -53,7 +53,8 @@
       <EnumValue value="120" display_value="120"/>
       <EnumValue value="2000" display_value="unlimited"/>
 	</UserPref>
-	<UserPref name="displayIcons" display_name="Display icons?" default_value="true" datatype="bool" required="true" /> 
+	<UserPref name="displayIcons" display_name="Display icons?" default_value="true" datatype="bool" /> 
+	<UserPref name="refresh" display_name="Refresh (in minutes, 0-never)" default_value="5" />
 	<UserPref name="feedusername" display_name="Username" default_value="" />
 	<UserPref name="feedpassword" display_name="Password" default_value="" />
   <UserPref name="inited" datatype="hidden" default_value="false" />
@@ -319,14 +320,14 @@ function processFeed(response)
     _IG_AdjustIFrameHeight();
     return;
   }
-  
+
   log("Response is valid.");
 	
   // Get a list of the <item> element nodes in the file
   var itemList = response.getElementsByTagName("item");
 
   log("Items count: " + itemList.length + ' (' + maxFeedItems + ')');
- 
+
   if (itemList.length > 0) {
     html += '<table class="issues">';
     if (displayIcons == false) {
@@ -416,13 +417,21 @@ function processFeed(response)
   else {
     html += '<span class="issues">No matching issues found</span>';
   }
-
   _gel("jiraissues__MODULE_ID__").innerHTML = html;
   _IG_AdjustIFrameHeight();
 }
 
-_IG_FetchXmlContent(getXmlUrl(prefs.getString("feedurl")), processFeed);
-_IG_AdjustIFrameHeight();
+function refreshLoop(timeout) {
+  _IG_FetchXmlContent(getXmlUrl(prefs.getString("feedurl")), processFeed);
+  _IG_AdjustIFrameHeight();
+  var timeout = prefs.getInt("refresh");
+  log(timeout);
+  if (timeout > 0) {
+    setTimeout("refreshLoop(" + timeout + ")", timeout * 60000);
+  }
+}
+
+refreshLoop();
 </script>
 ]]></Content>
 </Module>
