@@ -193,7 +193,7 @@ var debug_html = "<br/>";
 // Outputs debug messages if debug flag has a non-zero value
 function log(msg) {      
   if (debug) {
-    debug_html += msg + "\n";
+    debug_html += msg + "<br/>";
     // Write debug HTML to div
     _gel("debug__MODULE_ID__").innerHTML = debug_html;
     _IG_AdjustIFrameHeight();
@@ -221,10 +221,10 @@ function getXmlUrl(u) {
 
 function update(xmlUrl) {
   // DEBUG
-  log("Setting 'feedurl' to " + xmlUrl + "<br/>");
+  log("Setting 'feedurl' to " + xmlUrl);
   prefs.set('feedurl', xmlUrl);
   prefs.set('inited', 'true');
-  log("Initialized.<br/>");
+  log("Initialized.");
   _IG_FetchXmlContent(getXmlUrl(xmlUrl), processFeed);
 }
 
@@ -307,7 +307,7 @@ function processFeed(response)
 
   if (response == null || typeof(response) != "object" || response.firstChild == null) {
     // DEBUG
-    log("Invalid response!<br />");
+    log("Invalid response!");
     _IG_Analytics("UA-1805882-1", "/jira-issues-gadget/invalid_response");
     html += '<span class="error">Cannot retrieve JIRA data!</span><br />';
     html += '<span class="msg">Possible causes: URL is invalid or JIRA is not accessible <span class="minor">(possibly behind firewall?)</span></span><br /><br />';
@@ -320,13 +320,13 @@ function processFeed(response)
     return;
   }
   // DEBUG: is the function getting called?
-  log("Response is valid.<br />");
+  log("Response is valid.");
 	
   // Get a list of the <item> element nodes in the file
   var itemList = response.getElementsByTagName("item");
 
   // DEBUG: is the function getting called?
-  log("Items count: " + itemList.length + '(' + maxFeedItems + ')<br />');
+  log("Items count: " + itemList.length + ' (' + maxFeedItems + ')');
  
   html += '<table class="issues">';
   if (displayIcons == false) {
