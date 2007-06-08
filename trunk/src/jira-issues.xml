@@ -36,6 +36,26 @@
 	    <EnumValue value="8" display_value="8"/>
 	    <EnumValue value="9" display_value="9"/>
 	    <EnumValue value="10" display_value="10"/>
+	    <EnumValue value="11" display_value="11"/>
+	    <EnumValue value="12" display_value="12"/>
+	    <EnumValue value="13" display_value="13"/>
+	    <EnumValue value="14" display_value="14"/>
+	    <EnumValue value="15" display_value="15"/>
+	    <EnumValue value="16" display_value="16"/>
+	    <EnumValue value="17" display_value="17"/>
+	    <EnumValue value="18" display_value="18"/>
+	    <EnumValue value="19" display_value="19"/>
+	    <EnumValue value="20" display_value="20"/>
+	    <EnumValue value="21" display_value="21"/>
+	    <EnumValue value="22" display_value="22"/>
+	    <EnumValue value="23" display_value="23"/>
+	    <EnumValue value="24" display_value="24"/>
+	    <EnumValue value="25" display_value="25"/>
+	    <EnumValue value="26" display_value="26"/>
+	    <EnumValue value="27" display_value="27"/>
+	    <EnumValue value="28" display_value="28"/>
+	    <EnumValue value="29" display_value="29"/>
+	    <EnumValue value="30" display_value="30"/>
 	</UserPref>
 	<UserPref name="maxSummaryLength" display_name="Summary length" datatype="enum" default_value="40">
       <EnumValue value="20" display_value="20 - minimalistic"/>
