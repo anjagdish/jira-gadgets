@@ -1,8 +1,0 @@
-#summary This is a TO DO list for JIRA Issues gadget. This page can also serve as a placeholder for exchanging ideas.
-
-*TO DO:*
-
-  * Clean-up <a href> JavaScript links to work with link cleaner FF plugin
-  * Implement nice tooltip using JavaScript
-
-
