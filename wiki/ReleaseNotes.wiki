@@ -1,5 +1,16 @@
 #summary JIRA Issues gadget release notes
 
+== JIRA Issues Gadget 1.1 ==
+
+=== New Features ===
+  * Added content refresh. The frequency of refresh is customizable. This enables the gadget to poll for updates in Google Desktop, which does not automatically refresh as Google homepage does.
+  * Increased the number of displayable issues to 30. This enables to see more issues if the  user chooses to.
+
+=== Bug Fixes ===
+  * Added a message to display in case if no matching issues are found.
+  * Fixed a typo in CSS text-align.
+
+
 == JIRA Issues Gadget 1.0 ==
 
 === New Features ===
