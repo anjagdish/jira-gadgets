@@ -58,27 +58,15 @@
 	    <EnumValue value="29" display_value="29"/>
 	    <EnumValue value="30" display_value="30"/>
 	</UserPref>
-	<UserPref name="maxSummaryLength" display_name="Summary length" datatype="enum" default_value="40">
-		<EnumValue value="20" display_value="20 - minimalistic"/>
-		<EnumValue value="24" display_value="24 - text on 1024x768"/>
-		<EnumValue value="26" display_value="26 - icons on 800x600"/>
-		<EnumValue value="30" display_value="30"/>
-		<EnumValue value="40" display_value="40 - icons on 1024x768"/>
-		<EnumValue value="50" display_value="50"/>
-		<EnumValue value="60" display_value="60"/>
-		<EnumValue value="70" display_value="70"/>
-		<EnumValue value="80" display_value="80"/>
-		<EnumValue value="90" display_value="90"/>
-		<EnumValue value="100" display_value="100"/>
-		<EnumValue value="120" display_value="120"/>
-		<EnumValue value="2000" display_value="unlimited"/>
-	</UserPref>
 	<UserPref name="displayIcons" display_name="Display icons?" default_value="true" datatype="bool" /> 
 	<UserPref name="refresh" display_name="Refresh (in minutes, 0-never)" default_value="5" />
 	<UserPref name="feedusername" display_name="Username" default_value="" />
 	<UserPref name="feedpassword" display_name="Password" default_value="" />
+	<UserPref name="useTooltip" display_name="Use Tooltip" default_value="true" datatype="bool" />
 <Content type="html"><![CDATA[
 
+<link rel="stylesheet" type="text/css" media="screen" href="http://dushan.hanuska.googlepages.com/tips-style.css" />
+<script type="text/javascript" src="http://dushan.hanuska.googlepages.com/mootools.v1.11.js"></script>
 <style type="text/css">
 #footer__MODULE_ID__ {
   color: #808080;
@@ -112,6 +100,10 @@
   font-family: Arial, Helvetica, sans-serif;
   font-size: 12px;
   outline: none;
+}
+.summary div {
+  height: 1.5em;
+  overflow: hidden;
 }
 a:link.issueLink, a:visited.issueLink {
   color: #000;
@@ -287,19 +279,6 @@ function getPriorityIcon(u, id) {
   return null;
 }
 
-function truncate(summary,linkedSummary,maxLength) {
-  if (summary.length > maxLength) {
-    return '<a class="issueLink"'
-	  + ' onMouseOver="window.status=\'Expand\';return true"'
-	  + ' onMouseOut="window.status=\'\';return true"'
-	  + ' href="#"'
-	  + ' onclick="this.parentNode.innerHTML=unescape(\''+escape(linkedSummary)+'\');_IG_AdjustIFrameHeight();return false;">'
-      + summary.substring(0, maxLength).replace(/\w+$/, '')
-	  + '...<\/a>';
-  }
-  return linkedSummary;
-}
-
 // Get base url for icons
 function getBaseUrl(url) {
   var index = url.lastIndexOf("sr/jira.issueviews");
@@ -318,7 +297,7 @@ function processFeed(response)
   var feedurl = prefs.getString("feedurl");
   var maxFeedItems = prefs.getInt("maxFeedItems");
   var displayIcons = prefs.getBool("displayIcons");
-  var maxSummaryLength = parseInt(prefs.getInt("maxSummaryLength"));
+  var useTooltip = prefs.getBool("useTooltip");
   // Get base URL for icons (image locations)
   var baseUrl = getBaseUrl(feedurl);
 
@@ -403,8 +382,12 @@ function processFeed(response)
       }
     
       // Append extracted data to the HTML string.
-      html += '<tr class="' + (i % 2 == 0 ? 'even' : 'odd') + '" onMouseOver="this.className=\'highlight\'" onMouseOut="this.className=\'' + (i % 2 == 0 ? 'even' : 'odd') + '\'">\n';
-      html += '\t<td class="type" title="Type: ' + type + '">';
+      html += '<tr class="summaryToolTip ' + (i % 2 == 0 ? 'even' : 'odd') + '" onMouseOver="this.className=\'highlight\'" onMouseOut="this.className=\'' + (i % 2 == 0 ? 'even' : 'odd') + '\'"';
+	  if (useTooltip) {
+        html += ' title="<span style=\'font-weight:bold;\'>' + key + '</span><br/>Type: ' + type + '<br/>Status: ' + status + '<br/>Resolution: ' + resolution + '<br/>' + summary + '"';
+      }
+	  html += '>\n';
+      html += '\t<td class="type"' + (useTooltip ? '' : (' title="' + type + '"')) + '>';
       if (displayIcons) {
         html += '<span class="icon">' + (typeIcon == null ? '&nbsp;' : '<img src="' + typeIcon + '" alt="' + type + '"/>') + '</span>';
       }
@@ -412,15 +395,15 @@ function processFeed(response)
         html += type;
       }
       html += '</td>\n';
-      html += '\t<td class="summary" title="' + key + ': ' + status + ', ' + resolution + '' + '">';
+      html += '\t<td class="summary"' + (useTooltip ? '' : (' title="' + summary + '"')) + '><div>';
       if (link == null) {
-        html += truncate(summary,summary,maxSummaryLength);
+        html += summary;
       }
       else {
-        html += truncate(summary,'<a class="issueLink" href="' + link + '" target="_blank" onClick="issueClick(); return true;">' + summary + '</a>',maxSummaryLength);
+        html += '<a class="issueLink" href="' + link + '" target="_blank" onClick="issueClick(); return true;">' + summary + '</a>';
       }
-      html += '</td>\n';
-      html += '\t<td class="priority" title="Priority: ' + priority + '">';
+      html += '</div></td>\n';
+      html += '\t<td class="priority"' + (useTooltip ? '' : (' title="' + priority + '"')) + '>';
       if (displayIcons) {
         html += '<span class="icon">' + (priorityIcon == null ? '&nbsp;' : '<img src="' + priorityIcon + '" title="Priority: ' + priority + '" alt="' + priority + '"/>') + '</span>';
       }
@@ -437,6 +420,19 @@ function processFeed(response)
   }
   _gel("jiraissues__MODULE_ID__").innerHTML = html;
   _IG_AdjustIFrameHeight();
+  if (useTooltip) {
+    new Tips($$('.summaryToolTip'), {
+      initialize:function(){
+        this.fx = new Fx.Style(this.toolTip, 'opacity', {duration: 500, wait: false}).set(0);
+      },
+      onShow: function(toolTip) {
+        this.fx.start(1);
+      },
+      onHide: function(toolTip) {
+        this.fx.start(0);
+      }
+    });
+  }
 }
 
 function refreshLoop(timeout) {
