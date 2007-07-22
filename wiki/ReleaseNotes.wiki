@@ -1,5 +1,16 @@
 #summary JIRA Issues gadget release notes
 
+== JIRA Issues Gadget 1.2 ==
+
+=== New Features ===
+  * Overall improvement of the way summary information is displayed and well as truncation of long summaries. Changed CSS in order to auto-hide part of the summary that overflows. 
+  * Added a pop-up tooltip that displays more information about the issue. The information displayed is: *issue key*, *type*, *status*, *resolution* and full length *summary*.
+
+=== Bug Fixes ===
+  * Removed _maxSummaryLength_ user preference as it is no longer required.
+  * Link on the summary that was handled by JavaScript and did not work properly with Redirect Remover Firefox add-on. With the summary improvements this is no longer an issue.
+
+
 == JIRA Issues Gadget 1.1 ==
 
 === New Features ===
