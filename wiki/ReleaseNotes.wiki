@@ -8,8 +8,10 @@
 
 === Bug Fixes ===
   * Removed 'maxSummaryLength' user preference as it is no longer required.
-  * Link on the summary that was handled by JavaScript and did not work properly with Redirect Remover Firefox add-on. With the summary improvements this is no longer an issue.
+  * Links on summaries did not work properly on Firefox with Redirect Remover add-on. With the summary improvements this is no longer an issue.
 
+=== Known Issues ===
+  * [http://code.google.com/p/jira-gadgets/issues/detail?id=9 Issue 9] - Tooltip window may stay displayed even if mouse moves out of the area. This window will stay until the gadget is refreshed (you can set the refresh rate in user properties). If this will happen too often, you may choose to disable this feature (via user preferences), which will cause the gadget to revert back to its previous behavior. Your feedback on this issue is welcome.
 
 == JIRA Issues Gadget 1.1 ==
 
@@ -26,3 +28,6 @@
 
 === New Features ===
   * Initial implemetation, which fetches 1-10 issues from JIRA via its XML view.
+
+
+
