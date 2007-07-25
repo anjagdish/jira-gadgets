@@ -23,7 +23,7 @@
 		<Require feature="settitle" />
 		<Locale lang="en" country="us" />
 	</ModulePrefs>
-	<UserPref name="version" datatype="hidden" default_value="1.1" />
+	<UserPref name="version" datatype="hidden" default_value="1.2" />
 	<UserPref name="title" display_name="Gadget Title" default_value="JIRA Issues" /> 
 	<UserPref name="feedurl" display_name="JIRA XML URL" default_value="http://jira.atlassian.com/sr/jira.issueviews:searchrequest-xml/temp/SearchRequest.xml?pid=10240&amp;updated%3Aprevious=-1d&amp;sorter/field=updated&amp;sorter/order=DESC" required="true"/>
 	<UserPref name="maxFeedItems" display_name="Items Total" datatype="enum" default_value="10" required="true">
